@@ -28,17 +28,24 @@
       var(--bg);
     color:#fff;
     min-height:100vh;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:24px;
+    overflow:hidden;
+    position:relative;
+  }
+
+  /* landscape canvas that scales to fit any screen */
+  .scaler{
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:1480px;
+    transform-origin:center center;
+    transform:translate(-50%,-50%) scale(1);
   }
 
   /* ---- outer HUD frame ---- */
   .stage{
     position:relative;
-    width:100%;
-    max-width:1180px;
+    width:1480px;
     background:
       linear-gradient(180deg, rgba(8,16,26,.85), rgba(3,6,10,.95)),
       repeating-linear-gradient(0deg, rgba(38,198,255,.035) 0 1px, transparent 1px 26px),
@@ -103,7 +110,7 @@
     display:block;
     font-style:italic;
     font-weight:800;
-    font-size:clamp(40px,7vw,92px);
+    font-size:90px;
     letter-spacing:2px;
     color:#eaf6ff;
     text-shadow:0 0 10px rgba(255,255,255,.55),0 0 26px rgba(38,198,255,.55);
@@ -112,7 +119,7 @@
     display:block;
     font-style:italic;
     font-weight:900;
-    font-size:clamp(58px,11vw,150px);
+    font-size:148px;
     letter-spacing:1px;
     background:linear-gradient(180deg,#d6ff52,#7ed91e 70%);
     -webkit-background-clip:text;background-clip:text;color:transparent;
@@ -134,8 +141,8 @@
   .banner .chev{display:flex;color:var(--blue);text-shadow:var(--glow-blue);font-weight:900;font-size:24px;letter-spacing:-6px;}
   .banner .chev.r{transform:scaleX(-1);}
   .banner .txt{font-family:'Saira Condensed',sans-serif;font-weight:800;font-style:italic;text-align:center;line-height:1.05;}
-  .banner .txt .l1{font-size:clamp(18px,2.5vw,28px);color:#fff;letter-spacing:1px;}
-  .banner .txt .l2{font-size:clamp(15px,2vw,22px);color:var(--green);letter-spacing:1px;text-shadow:var(--glow-green);}
+  .banner .txt .l1{font-size:28px;color:#fff;letter-spacing:1px;}
+  .banner .txt .l2{font-size:22px;color:var(--green);letter-spacing:1px;text-shadow:var(--glow-green);}
 
   /* QR panel */
   .qr-panel{
@@ -196,22 +203,11 @@
   .step.goodluck h3{font-size:22px;line-height:1.05;}
   .step.goodluck .ico svg{filter:drop-shadow(0 0 8px rgba(38,198,255,.8));}
 
-  @media(max-width:860px){
-    .stage{padding:40px 22px 34px;}
-    .top{grid-template-columns:1fr;}
-    .qr-panel{max-width:320px;margin:8px auto 0;}
-    .steps{grid-template-columns:repeat(2,1fr);gap:26px 0;}
-    .step:nth-child(odd)::before{display:none;}
-    .step.goodluck{grid-column:1 / -1;}
-    .dash{display:none;}
-  }
-  @media(max-width:480px){
-    .steps{grid-template-columns:1fr;}
-    .step + .step::before{display:none;}
-  }
+  /* Layout is a fixed landscape canvas (scaled to fit by JS) — it never stacks. */
 </style>
 </head>
 <body>
+  <div class="scaler">
   <main class="stage">
     <!-- corner brackets -->
     <div class="corner tl"><span class="h"></span><span class="v"></span></div>
@@ -345,5 +341,25 @@
       </div>
     </div>
   </main>
+  </div>
+
+  <script>
+    // Scale the fixed landscape canvas to fit the viewport while keeping aspect ratio.
+    (function(){
+      var scaler = document.querySelector('.scaler');
+      var stage  = document.querySelector('.stage');
+      function fit(){
+        var w = stage.offsetWidth, h = stage.offsetHeight;
+        var margin = 0.97; // small breathing room
+        var s = Math.min((window.innerWidth * margin) / w, (window.innerHeight * margin) / h);
+        scaler.style.transform = 'translate(-50%,-50%) scale(' + s + ')';
+      }
+      window.addEventListener('resize', fit);
+      window.addEventListener('orientationchange', fit);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+      window.addEventListener('load', fit);
+      fit();
+    })();
+  </script>
 </body>
 </html>
